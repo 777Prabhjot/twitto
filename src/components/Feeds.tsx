@@ -1,24 +1,38 @@
 "use client";
 import { trpc } from "@/app/_trpc/client";
 import Tweet from "./Tweet";
+import SkeletonLoader from "./SkeletonLoader";
 
 const Feeds = () => {
-  const { data } = trpc.allTweets.useQuery();
+  const { data, isLoading } = trpc.allTweets.useQuery();
+
   return (
-    <div>
-      {data &&
-        data?.map((tweet) => {
-          return (
-            <Tweet
-              key={tweet.id}
-              userImage={tweet.User?.image!}
-              userName={tweet.User?.name!}
-              userEmail={tweet.User?.email!}
-            />
-          );
-        })}
-      ;
-    </div>
+    <>
+      {isLoading ? (
+        <>
+          <SkeletonLoader />
+          <SkeletonLoader />
+        </>
+      ) : (
+        <div>
+          {data?.tweets?.map((tweet) => {
+            return (
+              <Tweet
+                key={tweet.id}
+                tweetId={tweet.id!}
+                tweetBy={tweet.userId!}
+                currentUserId={data.currentUserId!}
+                userImage={tweet.User?.image!}
+                userName={tweet.User?.name!}
+                userEmail={tweet.User?.email!}
+                content={tweet.content!}
+                createdAt={tweet.createdAt}
+              />
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 };
 
