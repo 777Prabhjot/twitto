@@ -1,4 +1,4 @@
-import { CreditCard, Gem, Medal, MousePointerSquare, User } from "lucide-react";
+import { CreditCard, Gem, Medal, User } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -15,13 +15,12 @@ import Image from "next/image";
 import UserAvatar from "./UserAvatar";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { cn } from "@/lib/utils";
-import { serverTrpc } from "@/trpc/trpc-caller";
 import Link from "next/link";
 import Logout from "./Logout";
+import Counter from "./Counter";
 
 export async function DropDown() {
   const data = await getServerSession(authProviders);
-  const user = await serverTrpc.userInfo();
   const subscriptionPlan = await getUserSubscriptionPlan();
 
   return (
@@ -48,15 +47,7 @@ export async function DropDown() {
               </p>
             </>
           ) : (
-            <>
-              <MousePointerSquare color="white" size={20} />
-              <p className="text-white font-bold ms-2">
-                {5 - Number(user?.tweets?.length) < 0
-                  ? 0
-                  : 5 - Number(user?.tweets?.length)}{" "}
-                Tweets Left
-              </p>
-            </>
+            <Counter />
           )}
         </div>
         {data?.user?.image ? (
