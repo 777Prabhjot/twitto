@@ -4,7 +4,13 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-export default function ProfileHeader() {
+export default function ProfileHeader({
+  tweets,
+  userName,
+}: {
+  tweets?: number;
+  userName?: string;
+}) {
   const { data } = trpc.userInfo.useQuery();
 
   return (
@@ -25,10 +31,10 @@ export default function ProfileHeader() {
               </div>
               <div className="mx-2">
                 <h2 className="mb-0 text-xl font-bold text-white capitalize">
-                  {data?.user?.name}
+                  {tweets ? userName : <>{data?.user?.name}</>}
                 </h2>
                 <p className="mb-0 w-48 text-xs text-gray-400">
-                  {data?.tweets?.length} Tweets
+                  {tweets ? tweets : <>{data?.tweets?.length}</>} Tweets
                 </p>
               </div>
             </div>
