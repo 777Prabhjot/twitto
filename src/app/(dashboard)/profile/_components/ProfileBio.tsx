@@ -6,6 +6,7 @@ import { serverTrpc } from "@/trpc/trpc-caller";
 import banner from "@/../public/banner.png";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import verify from "@/../public/verify.png";
+import Followers from "./Followers";
 
 const ProfileBio = async () => {
   const data = await serverTrpc.userInfo();
@@ -22,7 +23,7 @@ const ProfileBio = async () => {
     <div>
       <div className="w-full bg-cover bg-no-repeat bg-center">
         <Image
-          className="w-full h-full"
+          className="w-full h-full sm:h-[200px]"
           src={banner}
           width={200}
           height={200}
@@ -33,10 +34,10 @@ const ProfileBio = async () => {
         <div className="relative flex w-full">
           {/* Avatar */}
           <div className="flex flex-1">
-            <div style={{ marginTop: "-6rem" }}>
+            <div className="md:!mt-[-4rem]" style={{ marginTop: "-6rem" }}>
               <div
                 style={{ height: "9rem", width: "9rem" }}
-                className="md rounded-full relative avatar"
+                className="md rounded-full relative avatar md:!w-[6rem] md:!h-[6rem]"
               >
                 {!data?.user?.image ? (
                   <div className="rounded-full bg-blue-300 w-[9rem] h-[9rem] flex items-center justify-center">
@@ -48,7 +49,7 @@ const ProfileBio = async () => {
                   <Image
                     width={100}
                     height={100}
-                    className="md w-[9rem] h-[9rem] rounded-full relative border-4 border-white"
+                    className="md w-[9rem] h-[9rem] md:w-[6rem] md:h-[6rem] rounded-full relative border-4 border-white"
                     src={data?.user.image}
                     alt=""
                   />
@@ -89,9 +90,9 @@ const ProfileBio = async () => {
             {data?.user?.bio && (
               <p className="text-white leading-tight mb-2">{data?.user?.bio}</p>
             )}
-            <div className="text-gray-600 flex">
+            <div className="text-gray-600 flex flex-wrap">
               {data?.user?.link && (
-                <span className="flex mr-2">
+                <div className="flex mr-2">
                   <Link size={20} />{" "}
                   <a
                     href={data?.user.link}
@@ -100,26 +101,17 @@ const ProfileBio = async () => {
                   >
                     {data?.user?.link}
                   </a>
-                </span>
+                </div>
               )}
-              <span className="flex mr-2">
+              <div className="flex mr-2 md:mt-2">
                 <CalendarDays size={20} />{" "}
                 <span className="leading-5 ml-1">
                   Joined {month}, {year}
                 </span>
-              </span>
+              </div>
             </div>
           </div>
-          <div className="pt-3 flex justify-start items-start w-full divide-x divide-gray-800 divide-solid">
-            <div className="text-center pr-3">
-              <span className="font-bold text-white">520</span>
-              <span className="text-gray-600"> Following</span>
-            </div>
-            <div className="text-center px-3">
-              <span className="font-bold text-white">23,4m </span>
-              <span className="text-gray-600"> Followers</span>
-            </div>
-          </div>
+          <Followers />
         </div>
       </div>
       <hr className="border-gray-800" />
