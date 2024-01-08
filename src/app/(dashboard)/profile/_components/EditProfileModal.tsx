@@ -23,12 +23,14 @@ const EditProfileModal = () => {
   });
   const [modal, setModal] = useState(false);
   const router = useRouter();
+  const utils = trpc.useUtils();
 
   const { mutate: updateProfile, isLoading } = trpc.updateProfile.useMutation({
     onSuccess(data) {
       toast.success("Profile updated successfully");
       setTimeout(() => {
         setModal(false);
+        utils.userInfo.invalidate();
         router.refresh();
       }, 1000);
     },
