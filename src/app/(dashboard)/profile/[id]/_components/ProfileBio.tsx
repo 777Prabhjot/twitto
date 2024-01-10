@@ -15,6 +15,7 @@ const ProfileBio = ({
   userId: string;
 }) => {
   const utils = trpc.useUtils();
+
   const { data } = trpc.getUserById.useQuery(userId);
   const { data: userInfo } = trpc.userInfo.useQuery();
   const { mutate, isLoading } = trpc.followUser.useMutation({
@@ -26,6 +27,7 @@ const ProfileBio = ({
       toast.error("Something went wrong");
     },
   });
+
   const { mutate: unfollowUser, isLoading: loading } =
     trpc.unfollowUser.useMutation({
       onSuccess: () => {
@@ -37,12 +39,16 @@ const ProfileBio = ({
       },
     });
 
-  const dateObject = new Date(data?.createdAt!);
+  let year = null;
+  let month = "";
+  if (data) {
+    const dateObject = new Date(data.createdAt!);
 
-  const year = dateObject.getFullYear();
-  const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(
-    dateObject
-  );
+    year = dateObject.getFullYear();
+    month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+      dateObject
+    );
+  }
 
   let alreadyFollowedRef = false;
 
@@ -166,12 +172,14 @@ const ProfileBio = ({
                   </a>
                 </div>
               )}
-              <div className="flex mr-2 md:mt-2">
-                <CalendarDays size={20} />{" "}
-                <span className="leading-5 ml-1">
-                  Joined {month}, {year}
-                </span>
-              </div>
+              {data && (
+                <div className="flex mr-2 md:mt-2">
+                  <CalendarDays size={20} />{" "}
+                  <span className="leading-5 ml-1">
+                    Joined {month}, {year}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           <div className="pt-3 flex justify-start items-start w-full divide-x divide-gray-800 divide-solid">
