@@ -29,8 +29,8 @@ export async function DropDown() {
         className={cn(
           subscriptionPlan?.isSubscribed && !subscriptionPlan?.isCanceled
             ? subscriptionPlan?.name === "Premium"
-              ? "flex items-center bg-gradient-to-r from-orange-300 to-orange-500 border-2 border-orange-300 px-4 py-1 rounded-3xl"
-              : "flex items-center bg-gradient-to-r from-cyan-500 to-blue-500 border-2 border-cyan-500 px-4 py-1 rounded-3xl"
+              ? "flex items-center bg-gradient-to-r from-orange-300 to-orange-500 border-2 border-orange-300 px-4 py-0 rounded-3xl"
+              : "flex items-center bg-gradient-to-r from-cyan-500 to-blue-500 border-2 border-cyan-500 px-4 py-0 rounded-3xl"
             : "flex items-center bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% border-2 border-indigo-500 px-4 py-1 rounded-3xl"
         )}
       >

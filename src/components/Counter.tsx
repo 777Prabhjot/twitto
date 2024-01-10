@@ -9,9 +9,15 @@ const Counter = () => {
     <>
       <MousePointerSquare color="white" size={20} />
       <p className="text-white font-bold ms-2">
-        {5 - Number(data?.tweets.length) < 0
-          ? 0
-          : 5 - Number(data?.tweets.length)}{" "}
+        {data ? (
+          <>
+            {5 - Number(data?.tweets.length) < 0
+              ? 0
+              : 5 - Number(data?.tweets.length)}
+          </>
+        ) : (
+          0
+        )}{" "}
         Tweets Left
       </p>
     </>
