@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Twitto",
-  description: "Twitto home page",
+  description: "Twitto is home page",
 };
 
 export default function RootLayout({
