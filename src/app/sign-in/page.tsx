@@ -1,18 +1,39 @@
-"use client";
-import Auth from "@/components/Auth";
-import { signIn } from "next-auth/react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import SignInForm from "./_components/SignInForm";
+import SigninWithGithub from "./_components/SigninWithGithub";
+import { authProviders } from "@/lib/auth";
 
-const SignInPage = () => {
+export default async function SignIn() {
+  const session = await getServerSession(authProviders);
+
+  if (session) {
+    return redirect("/");
+  }
   return (
-    // <button
-    //   className="bg-slate-600 px-4 py-2 text-white"
-    //   onClick={() => signIn("github", { callbackUrl: "/profile" })}
-    //   type="button"
-    // >
-    //   Sign In With GitHub
-    // </button>
-    <Auth />
-  );
-};
+    <div className="w-screen h-screen flex items-center justify-center">
+      <Card>
+        <CardHeader>
+          <CardTitle>Please sign in </CardTitle>
+          <CardDescription>
+            To access the private pages you have to be authenticated
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col">
+            <SignInForm />
 
-export default SignInPage;
+            <SigninWithGithub />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
