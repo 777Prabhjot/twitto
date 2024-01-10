@@ -1,107 +1,225 @@
 import Image from "next/image";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import DOMPurify from "dompurify";
+import { Heart, MessageCircle, Repeat2, Trash2 } from "lucide-react";
+import UserAvatar from "./UserAvatar";
+import { trpc } from "@/app/_trpc/client";
+import { toast } from "sonner";
+import { MoonLoader } from "react-spinners";
+import { cn } from "@/lib/utils";
+import verify from "@/../public/verify.png";
+import ReactPlayer from "react-player";
+import Link from "next/link";
 
 type TweetInfo = {
-  userImage: string;
+  tweetId: string;
+  tweetBy: string;
+  userImage?: string;
   userName: string;
   userEmail: string;
+  content: string;
+  image?: string;
+  video?: string;
+  createdAt: string;
+  currentUserId: string;
+  isSubscribed: boolean;
+  isCanceled: boolean;
+  tweetLikes: {
+    id: string;
+    userId: string;
+    tweetId: string;
+  }[];
 };
 
-const Tweet = ({ userImage, userName, userEmail }: TweetInfo) => {
+const Tweet = ({
+  tweetId,
+  tweetBy,
+  userImage,
+  userName,
+  userEmail,
+  content,
+  isCanceled,
+  isSubscribed,
+  image,
+  video,
+  tweetLikes,
+  createdAt,
+  currentUserId,
+}: TweetInfo) => {
+  const [likedUsers, setLikedUsers] = useState<Set<string>>(new Set());
+
+  const utils = trpc.useUtils();
+  const { mutate: deleteTweet, isLoading } = trpc.deleteTweet.useMutation({
+    onSuccess(data) {
+      utils.userInfo.invalidate();
+      utils.allTweets.invalidate();
+      toast.success("Tweet deleted successfully");
+    },
+    onError(err) {
+      toast.error("Something went wrong");
+    },
+  });
+
+  const { mutate: likeTweet } = trpc.likeTweet.useMutation();
+  const { mutate: removeTweetLike } = trpc.removeTweetLike.useMutation();
+
+  useEffect(() => {
+    const tweetLikedUsers = new Set(tweetLikes.map((like) => like.userId));
+    setLikedUsers(tweetLikedUsers);
+  }, [tweetLikes]);
+
+  const dateObject = new Date(createdAt);
+
+  const day = dateObject.getDate();
+  const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+    dateObject
+  );
+
+  const styledText = content.replace(
+    /(#\w+)/g,
+    '<span style="color: skyblue;">$1</span>'
+  );
+
+  const sanitizedHTML = DOMPurify.sanitize(styledText);
+
+  const handleDeleteTweet = () => {
+    deleteTweet(tweetId);
+  };
+
+  const handleTweetLike = () => {
+    try {
+      if (isLiked) {
+        removeTweetLike(tweetId);
+      } else {
+        likeTweet(tweetId);
+      }
+
+      setLikedUsers((prevLikedUsers) => {
+        const updatedLikedUsers = new Set(prevLikedUsers);
+
+        if (isLiked) {
+          updatedLikedUsers.delete(currentUserId);
+        } else {
+          updatedLikedUsers.add(currentUserId);
+        }
+
+        return updatedLikedUsers;
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const isLiked = likedUsers.has(currentUserId);
+
   return (
-    <article className="hover:bg-gray-800 transition duration-350 ease-in-out">
-      <div className="flex flex-shrink-0 p-4 pb-0">
-        <a href="#" className="flex-shrink-0 group block">
-          <div className="flex items-center">
+    <article className="hover:bg-gray-800 mt-1 transition duration-350 ease-in-out">
+      <div className="p-4 pb-0">
+        <div className="flex-1 md:flex-wrap md:flex-none group block">
+          <div className="flex items-center relative">
             <div>
+              {userImage ? (
+                <Image
+                  className="inline-block rounded-full"
+                  src={userImage}
+                  width={40}
+                  loading="lazy"
+                  height={40}
+                  alt=""
+                />
+              ) : (
+                <UserAvatar userName={userName} />
+              )}
+            </div>
+            <Link
+              href={
+                tweetBy === currentUserId ? "/profile" : `/profile/${tweetBy}`
+              }
+              className="ml-3 w-full cursor-pointer"
+            >
+              <div className="text-base flex items-center leading-6 font-medium text-white">
+                {userName}
+                <span className="text-sm leading-5 font-medium text-gray-400 group-hover:text-gray-300 transition ease-in-out duration-150">
+                  @{userEmail?.slice(0, 10)}...
+                </span>
+                {tweetBy === currentUserId && (
+                  <>
+                    {isSubscribed && !isCanceled && (
+                      <Image
+                        className="w-4 h-4 ms-[2px]"
+                        src={verify}
+                        width={20}
+                        height={20}
+                        alt="blue-tick"
+                      />
+                    )}
+                  </>
+                )}
+                <div className="text-sm ms-2 flex leading-5 font-medium text-gray-400">
+                  {day}{" "}
+                  <span className="hidden md:block ms-1">
+                    {month?.slice(0, 3)}
+                  </span>
+                  <span className="md:hidden ms-1">{month}</span>
+                </div>
+              </div>
+            </Link>
+            {tweetBy === currentUserId && (
+              <div className="absolute right-0">
+                {isLoading ? (
+                  <MoonLoader size={20} color="#dbeef6" />
+                ) : (
+                  <Trash2
+                    color="white"
+                    size={18}
+                    className="cursor-pointer hover:stroke-red-500"
+                    onClick={handleDeleteTweet}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="pl-16">
+        <div className="text-base width-auto font-medium text-white flex-shrink">
+          <p dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />
+        </div>
+        {image && (
+          <div className="md:flex-shrink pr-6 pt-3">
+            <div className="bg-cover bg-no-repeat bg-center w-full h-fit">
               <Image
-                className="inline-block rounded-full"
-                src={userImage}
-                width={40}
-                height={40}
+                className="rounded-xl w-[370px] md:w-[90%]"
+                src={image!}
+                width={420!}
+                height={200!}
+                loading="lazy"
                 alt=""
               />
             </div>
-            <div className="ml-3">
-              <p className="text-base leading-6 font-medium text-white">
-                {userName}
-                <span className="text-sm leading-5 font-medium text-gray-400 group-hover:text-gray-300 transition ease-in-out duration-150">
-                  @{userEmail} . 16 April
-                </span>
-              </p>
+          </div>
+        )}
+        {video && (
+          <div className="md:flex-shrink pr-6 pt-3">
+            <div className="bg-cover bg-no-repeat bg-center w-full h-fit">
+              <ReactPlayer controls url={video} width={420} height={200} />
             </div>
           </div>
-        </a>
-      </div>
-      <div className="pl-16">
-        <p className="text-base width-auto font-medium text-white flex-shrink">
-          Day 07 of the challenge{" "}
-          <a href="#" className="text-blue-400">
-            #100DaysOfCode
-          </a>
-          I was wondering what I can do with{" "}
-          <a href="#" className="text-blue-400">
-            #tailwindcss
-          </a>
-          , so just started building Twitter UI using Tailwind and so far it
-          looks so promising. I will post my code after completion. [07/100]
-          <a href="#" className="text-blue-400">
-            {" "}
-            #WomenWhoCode #CodeNewbie
-          </a>
-        </p>
-        {/* <div className="md:flex-shrink pr-6 pt-3">
-      <div
-        className="bg-cover bg-no-repeat bg-center rounded-lg w-full h-64"
-        style={{
-          height: 200,
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=448&q=80)",
-        }}
-      >
-        <img
-          className="opacity-0 w-full h-full"
-          src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=448&q=80"
-          alt=""
-        />
-      </div>
-    </div> */}
+        )}
         <div className="flex items-center py-4">
           <div className="flex-1 flex items-center text-white text-xs hover:text-blue-400 transition duration-350 ease-in-out">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5 mr-2"
-            >
-              <g>
-                <path d="M14.046 2.242l-4.148-.01h-.002c-4.374 0-7.8 3.427-7.8 7.802 0 4.098 3.186 7.206 7.465 7.37v3.828c0 .108.044.286.12.403.142.225.384.347.632.347.138 0 .277-.038.402-.118.264-.168 6.473-4.14 8.088-5.506 1.902-1.61 3.04-3.97 3.043-6.312v-.017c-.006-4.367-3.43-7.787-7.8-7.788zm3.787 12.972c-1.134.96-4.862 3.405-6.772 4.643V16.67c0-.414-.335-.75-.75-.75h-.396c-3.66 0-6.318-2.476-6.318-5.886 0-3.534 2.768-6.302 6.3-6.302l4.147.01h.002c3.532 0 6.3 2.766 6.302 6.296-.003 1.91-.942 3.844-2.514 5.176z" />
-              </g>
-            </svg>
-            12.3 k
+            <MessageCircle size={20} className="me-2 cursor-pointer" />
           </div>
           <div className="flex-1 flex items-center text-white text-xs  hover:text-green-400 transition duration-350 ease-in-out">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5 mr-2"
-            >
-              <g>
-                <path d="M23.77 15.67c-.292-.293-.767-.293-1.06 0l-2.22 2.22V7.65c0-2.068-1.683-3.75-3.75-3.75h-5.85c-.414 0-.75.336-.75.75s.336.75.75.75h5.85c1.24 0 2.25 1.01 2.25 2.25v10.24l-2.22-2.22c-.293-.293-.768-.293-1.06 0s-.294.768 0 1.06l3.5 3.5c.145.147.337.22.53.22s.383-.072.53-.22l3.5-3.5c.294-.292.294-.767 0-1.06zm-10.66 3.28H7.26c-1.24 0-2.25-1.01-2.25-2.25V6.46l2.22 2.22c.148.147.34.22.532.22s.384-.073.53-.22c.293-.293.293-.768 0-1.06l-3.5-3.5c-.293-.294-.768-.294-1.06 0l-3.5 3.5c-.294.292-.294.767 0 1.06s.767.293 1.06 0l2.22-2.22V16.7c0 2.068 1.683 3.75 3.75 3.75h5.85c.414 0 .75-.336.75-.75s-.337-.75-.75-.75z" />
-              </g>
-            </svg>
-            14 k
+            <Repeat2 size={20} className="me-2 cursor-pointer" />
           </div>
-          <div className="flex-1 flex items-center text-white text-xs  hover:text-red-600 transition duration-350 ease-in-out">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5 mr-2"
-            >
-              <g>
-                <path d="M12 21.638h-.014C9.403 21.59 1.95 14.856 1.95 8.478c0-3.064 2.525-5.754 5.403-5.754 2.29 0 3.83 1.58 4.646 2.73.814-1.148 2.354-2.73 4.645-2.73 2.88 0 5.404 2.69 5.404 5.755 0 6.376-7.454 13.11-10.037 13.157H12zM7.354 4.225c-2.08 0-3.903 1.988-3.903 4.255 0 5.74 7.034 11.596 8.55 11.658 1.518-.062 8.55-5.917 8.55-11.658 0-2.267-1.823-4.255-3.903-4.255-2.528 0-3.94 2.936-3.952 2.965-.23.562-1.156.562-1.387 0-.014-.03-1.425-2.965-3.954-2.965z" />
-              </g>
-            </svg>
-            14 k
+          <div className="flex-1 flex items-center text-white text-xs transition duration-350 ease-in-out">
+            <Heart
+              size={20}
+              className={cn("me-2 cursor-pointer", isLiked && "fill-red-500")}
+              onClick={handleTweetLike}
+            />
+            {likedUsers.size}
           </div>
           <div className="flex-1 flex items-center text-xs text-gray-400 hover:text-blue-400 transition duration-350 ease-in-out">
             <svg
