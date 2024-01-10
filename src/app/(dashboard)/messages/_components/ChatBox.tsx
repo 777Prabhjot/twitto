@@ -15,13 +15,18 @@ const ChatBox = ({ roomId }: { roomId: string }) => {
   };
 
   return (
-    <div className="w-full p-7 mt-5 mx-auto">
+    <div className="w-full p-7 relative mt-5 sm:mt-10 mx-auto">
+      <div className="absolute md:top-[-1%] top-[-3%] left-[40%]">
+        <p className="text-white font-bold md:text-lg sm:!text-xl text-xl">
+          Chat Room
+        </p>
+      </div>
       <Messages roomId={roomId} />
       <div>
         <label htmlFor="chat" className="sr-only">
           Your message
         </label>
-        <div className="flex items-center py-2 px-3 bg-gray-50 border-t-2 rounded-lg rounded-t-none dark:bg-gray-700">
+        <div className="flex items-center md:w-[90vw] py-2 px-3 bg-gray-50 border-t-2 rounded-lg rounded-t-none dark:bg-gray-700">
           <textarea
             id="chat"
             rows={1}

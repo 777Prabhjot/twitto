@@ -8,6 +8,7 @@ interface MessagesProps {
 }
 
 const Messages = ({ roomId }: MessagesProps) => {
+  const [initialMessages, setInitialMessages] = useState<string[]>([]);
   const [incomingMessages, setIncomingMessages] = useState<string[]>([]);
 
   useEffect(() => {
@@ -29,28 +30,33 @@ const Messages = ({ roomId }: MessagesProps) => {
 
   const { data, isSuccess } = trpc.existingMessages.useQuery(roomId);
 
-  let initialMessages: { text: string; id: string }[] | undefined;
-
   useEffect(() => {
-    initialMessages = data?.map((message) => ({
-      text: message.text,
-      id: message.id,
-    }));
-  }, []);
+    if (isSuccess) {
+      data?.forEach((message) => {
+        setInitialMessages((prev) => [...prev, message.text]);
+      });
+    }
+  }, [isSuccess]);
+
+  console.log(initialMessages);
 
   return (
-    <div className="bg-white h-[85%] rounded-lg rounded-b-none p-12 flex flex-col items-start">
-      {initialMessages?.map((message) => (
-        <div key={message.id}>
-          <div className="flex items-center flex-row-reverse mb-4">
-            <div className="flex-1 bg-indigo-100 text-gray-800 p-2 rounded-lg mb-2 relative">
-              <div>{message.text}</div>
+    <div className="bg-white h-[365px] md:w-[90vw] md:h-[500px] w-full rounded-lg rounded-b-none p-12 flex flex-col items-start overflow-y-scroll">
+      {isSuccess && (
+        <>
+          {initialMessages.map((message, i) => (
+            <div key={i}>
+              <div className="flex items-center flex-row-reverse mb-4">
+                <div className="flex-1 bg-indigo-100 text-gray-800 p-2 rounded-lg mb-2 relative">
+                  <div>{message}</div>
 
-              <div className="absolute right-0 top-1/2 transform translate-x-1/2 rotate-45 w-2 h-2 bg-indigo-100"></div>
+                  <div className="absolute right-0 top-1/2 transform translate-x-1/2 rotate-45 w-2 h-2 bg-indigo-100"></div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      ))}
+          ))}
+        </>
+      )}
       {incomingMessages.map((text, i) => (
         <div key={i}>
           <div className="flex items-center flex-row-reverse mb-4">
