@@ -1,16 +1,21 @@
 import Feeds from "@/components/Feeds";
-import SideBar from "@/components/SideBar";
 import TopBar from "@/components/TopBar";
+import { getUserSubscriptionPlan } from "@/lib/subscription";
 
-export default function Home() {
+export default async function Home() {
+  const subscriptionPlan = await getUserSubscriptionPlan();
+
   return (
-    <div className="bg-[#15202b] h-full">
-      <SideBar />
-      <div className="flex justify-center ">
-        <div className="max-w-[600px]">
-          <TopBar />
-          <Feeds />
-        </div>
+    <div className="h-full">
+      <div className="max-w-[600px] md:max-w-full ms-16 md:ms-3">
+        <TopBar
+          isSubscribed={subscriptionPlan?.isSubscribed as boolean}
+          isCanceled={subscriptionPlan?.isCanceled as boolean}
+        />
+        <Feeds
+          isSubscribed={subscriptionPlan?.isSubscribed as boolean}
+          isCanceled={subscriptionPlan?.isCanceled as boolean}
+        />
       </div>
     </div>
   );
