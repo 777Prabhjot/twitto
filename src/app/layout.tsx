@@ -8,6 +8,8 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Twitto",
   description: "Twitto is home page",
+  keywords:
+    "twitter, twitto, twittoo, twitto vercel, twittoo vercel, twitter clone, nextjs, tailwindcss, prabh, prabhjot, project, website, mernstack",
 };
 
 export default function RootLayout({
