@@ -22,7 +22,7 @@ export default function SignInForm() {
       redirect: false,
     });
 
-    if (!signInResult?.ok) {
+    if (signInResult?.error) {
       setLoading(false);
       return toast.error("Something went wrong, please try again");
     }
