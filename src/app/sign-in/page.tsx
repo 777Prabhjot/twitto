@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import SignInForm from "./_components/SignInForm";
 import SigninWithGithub from "./_components/SigninWithGithub";
 import { authProviders } from "@/lib/auth";
+import SignInWithGoogle from "./_components/SignInWithGoogle";
 
 export default async function SignIn() {
   const session = await getServerSession(authProviders);
@@ -29,6 +30,8 @@ export default async function SignIn() {
         <CardContent>
           <div className="flex flex-col">
             <SignInForm />
+
+            <SignInWithGoogle />
 
             <SigninWithGithub />
           </div>
