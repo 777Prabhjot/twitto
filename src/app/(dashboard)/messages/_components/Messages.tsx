@@ -38,8 +38,6 @@ const Messages = ({ roomId }: MessagesProps) => {
     }
   }, [isSuccess]);
 
-  console.log(initialMessages);
-
   return (
     <div className="bg-white h-[365px] md:w-[90vw] md:h-[500px] w-full rounded-lg rounded-b-none p-12 flex flex-col items-start overflow-y-scroll">
       {isSuccess && (
